@@ -14,7 +14,7 @@ def save_data(data_file_name, data):
 	Function to save data.
 	:param data_file_name: name of the data file
 	:param data: data used
-	:return: None
+	:return: none
 	"""
 	f = open(data_file_name, 'w')
 	f.write(str(data))
@@ -28,7 +28,7 @@ def load_data(data_file_name):
 	:return: data used
 	"""
 	f = open(data_file_name, 'rb')
-	data = 0  #TODO: load data
+	data = 0  # TODO: load data
 	f.close()
 	return data
 
@@ -39,7 +39,7 @@ def data_processing(text_file_name, ws, st):
 	:param text_file_name: name of the text file
 	:param ws: window size
 	:param st: stride
-	:return:
+	:return: training data
 	"""
 	file_path = './' + text_file_name  # file path
 
@@ -63,6 +63,30 @@ def data_processing(text_file_name, ws, st):
 	return training_data
 
 
+def model_train(model, data):
+	"""
+	Function to proceed the model training.
+	:param model: chosen model
+	:param data: training data
+	:return: none
+	"""
+	if model == 'simple_rnn':
+		simple_rnn()
+	elif model == 'lstm':
+		pass
+	else:
+		print("Error model chosen.")
+		sys.exit(-1)
+
+
+def simple_rnn():
+	"""
+	Function to create simple rnn model.
+	:return: simple rnn model
+	"""
+	pass
+
+
 if __name__ == "__main__":
 	cmd_command = 0  # set parameters manually
 	if cmd_command == 1:
@@ -75,10 +99,13 @@ if __name__ == "__main__":
 	else:
 		# manually set the parameters in the program
 		file_name = "beatles.txt"
-		model_select = "lstm"
+		model_select = "simple_rnn"
 		hidden_state_size = 100
 		window_size = 10
 		stride = 5
 
 	# data preprocessing
 	train_set = data_processing(file_name, window_size, stride)
+
+	# train model
+	model_train(model_select, train_set)
