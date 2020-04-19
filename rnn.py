@@ -5,7 +5,9 @@ Authors: Haoyuan Sun, Ximu Zhang
 Date: 04/15/2020
 """
 # library import
-from tensorflow import keras
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import LSTM, SimpleRNN
 import sys
 
 
@@ -63,17 +65,20 @@ def data_processing(text_file_name, ws, st):
 	return training_data
 
 
-def model_train(model, data):
+def model_train(model_name, data):
 	"""
 	Function to proceed the model training.
-	:param model: chosen model
+	:param model_name: chosen model
 	:param data: training data
 	:return: none
 	"""
-	if model == 'simple_rnn':
-		simple_rnn()
-	elif model == 'lstm':
-		pass
+	model = Sequential()
+	if model_name == 'simple_rnn':
+		model.add(SimpleRNN(units=100, input_dim=58))
+		model.add(Dense(58))
+	elif model_name == 'lstm':
+		model.add(LSTM(100, input_dim=58, return_sequences=True))
+		model.add(Dense(58))
 	else:
 		print("Error model chosen.")
 		sys.exit(-1)
