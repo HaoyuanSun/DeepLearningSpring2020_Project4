@@ -163,10 +163,10 @@ def model_train(model_name, data, target, hidden_state, code):
 
 	model = Sequential()
 	if model_name == 'simple_rnn':
-		model.add(SimpleRNN(units=hidden_state, input_shape=(n, p)))  #, return_sequences=True
+		model.add(SimpleRNN(units=hidden_state, input_shape=(n, p)))
 		model.add(Dense(p, activation='softmax'))
 	elif model_name == 'lstm':
-		model.add(LSTM(units=hidden_state,))  # return_sequences=True
+		model.add(LSTM(units=hidden_state))#, stateful=True, batch_input_shape=(200,)
 		model.add(Dense(p, activation='softmax'))
 	else:
 		print("Error model chosen.")
@@ -196,7 +196,7 @@ def model_test(model, code, n, p):
 
 	# test the model
 	predict_lyrics = text[:n]
-	for j in range(20):
+	for j in range(50):
 		# make prediction
 		predict_code = model.predict(x_test)
 		max_index = np.argmax(predict_code)
@@ -206,8 +206,10 @@ def model_test(model, code, n, p):
 		# update x_test
 		next_letter_code = np.zeros((1, p))
 		next_letter_code[0][max_index] = 1
-		np.delete(x_test[0], 0, axis=0)
-		np.append(x_test[0], next_letter_code, axis=0)
+		x_test = np.delete(x_test[0], 0, axis=0)
+		# x_test = np.append(x_test[0], next_letter_code, axis=0)
+		x_test = np.insert(x_test, n-1, next_letter_code, 0)
+		x_test = np.reshape(x_test, (1, n, p))
 	print(predict_lyrics)
 
 
