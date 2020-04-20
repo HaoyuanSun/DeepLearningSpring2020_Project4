@@ -144,12 +144,10 @@ def data_processing_2(text_file_name):
 		for j in range(n):
 			train_input[i][j][code.index(lines[i][j])] = 1
 
+	return train_input, train_output, code
 
 
-	return train_input, train_output
-
-
-def model_train(model_name, data, target, hidden_state):
+def model_train(model_name, data, target, hidden_state, code):
 	"""
 	Function to proceed the model training.
 	:param model_name: chosen model
@@ -177,20 +175,40 @@ def model_train(model_name, data, target, hidden_state):
 	# training the model
 	time_callback = TimeHistory()  # time callback used in model.fit()
 	batch_size = 200
-	epochs = 100
+	epochs = 50
 	model.compile(optimizer='adam',
 	              loss='categorical_crossentropy',
 	              metrics=['accuracy'])
 	hist = model.fit(data, target,
-	                 epochs=epochs,
+	                 batch_size=batch_size, epochs=epochs,
 	                 callbacks=[time_callback])
-	# model.fit(data, target,
-	#                  epochs=epochs)
-
 	plot_loss_figure(hist, time_callback)
 
-	# output = model.predict(data[0])
-	# print(output)
+	model_test(model, code, n, p)
+
+
+def model_test(model, code, n, p):
+			# prepare test data
+	text = 'we were both young when i first saw you'
+	x_test = np.zeros((1, n, p))
+	for i in range(n):
+		x_test[0][i][code.index(text[i])] = 1
+
+	# test the model
+	predict_lyrics = text[:n]
+	for j in range(20):
+		# make prediction
+		predict_code = model.predict(x_test)
+		max_index = np.argmax(predict_code)
+		next_letter = code[max_index]
+		predict_lyrics += next_letter
+
+		# update x_test
+		next_letter_code = np.zeros((1, p))
+		next_letter_code[0][max_index] = 1
+		np.delete(x_test[0], 0, axis=0)
+		np.append(x_test[0], next_letter_code, axis=0)
+	print(predict_lyrics)
 
 
 if __name__ == "__main__":
@@ -212,9 +230,9 @@ if __name__ == "__main__":
 
 	# data pre-processing
 	train_set, data_file = data_processing(file_name, window_size, stride)
-	x_train, y_train = data_processing_2(data_file)
+	x_train, y_train, code = data_processing_2(data_file)
 
 	# train model
-	model_train(model_select, x_train, y_train, hidden_state_size)
+	model_train(model_select, x_train, y_train, hidden_state_size, code)
 
 
