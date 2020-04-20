@@ -166,8 +166,8 @@ def model_train(model_name, data, target, hidden_state):
 		model.add(SimpleRNN(units=hidden_state, input_shape=(n, p)))
 		model.add(Dense(p, activation='softmax'))
 	elif model_name == 'lstm':
-		model.add(LSTM(100, input_dim=58, return_sequences=True))
-		model.add(Dense(58))
+		model.add(LSTM(units=hidden_state, ))  # return_sequences=True
+		model.add(Dense(p, activation='softmax'))
 	else:
 		print("Error model chosen.")
 		sys.exit(-1)
@@ -182,16 +182,14 @@ def model_train(model_name, data, target, hidden_state):
 	hist = model.fit(data, target,
 	                 batch_size=batch_size, epochs=epochs,
 	                 callbacks=[time_callback])
+	# model.fit(data, target,
+	#                  epochs=epochs)
 
 	plot_loss_figure(hist, time_callback)
 
 
-def simple_rnn():
-	"""
-	Function to create simple rnn model.
-	:return: simple rnn model
-	"""
-	pass
+# output = model.predict(data[0])
+# print(output)
 
 
 if __name__ == "__main__":
@@ -206,12 +204,12 @@ if __name__ == "__main__":
 	else:
 		# manually set the parameters in the program
 		file_name = "beatles.txt"
-		model_select = "simple_rnn"
+		model_select = "lstm"
 		hidden_state_size = 100
-		window_size = 10
-		stride = 5
+		window_size = 5
+		stride = 3
 
-	# data preprocessing
+	# data pre-processing
 	train_set, data_file = data_processing(file_name, window_size, stride)
 	x_train, y_train = data_processing_2(data_file)
 
