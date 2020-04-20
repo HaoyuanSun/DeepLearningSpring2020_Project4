@@ -1,5 +1,5 @@
 """
-Project 4 - Recurrent Neural Networks with Tensorow and Keras
+Project 4 - Recurrent Neural Networks with Tensorflow and Keras
 Course: COSC 525: Deep Learning (Spring 2020)
 Authors: Haoyuan Sun, Ximu Zhang
 Date: 04/15/2020
@@ -9,6 +9,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import LSTM, SimpleRNN
 import sys
+import numpy as np
 
 
 def save_data(data_file_name, data):
@@ -48,7 +49,7 @@ def data_processing(text_file_name, ws, st):
 	with open(file_path, 'rt', encoding='utf-8') as f:  # open the file and read
 		lines = f.readlines()  # read data
 		data_str = ''
-		for text in lines:  # attach lines togeter
+		for text in lines:  # attach lines together
 			data_str += text.replace('\n', '$')  # replace '\n' with '$'
 		f.close()
 
@@ -63,6 +64,40 @@ def data_processing(text_file_name, ws, st):
 	# save training set
 	save_data('train_set.txt', training_data)
 	return training_data
+
+
+def data_processing_2(text_file_name):
+	"""
+	Read text file in which each line is a single training sequence, assemble input and output array for training.
+	:param text_file_name: name of the text file
+	:return: input and output array for training
+	"""
+	file_path = './' + text_file_name  # file path
+
+	with open(file_path, 'rt', encoding='utf-8') as f:  # open the file and read
+		lines = f.readlines()  # read data
+		lines = [i.rstrip('\n') for i in lines]
+		f.close()
+
+	code = []
+	for line in lines:
+		code = list(set().union(code, np.unique(list(line))))
+
+	m = len(lines)
+	n = len(lines[0]) - 1
+	p = len(code)
+
+	# initialize array
+	train_input = np.zeros((m, n, p))
+	train_output = np.zeros((m, p))
+
+	# one hot encoding
+	for i in range(m):
+		train_output[i][np.where(code == lines[i][-1])] = 1
+		for j in range(n-1):
+			train_input[i][j][np.where(code == lines[i][j])] = 1
+
+	return train_input, train_output
 
 
 def model_train(model_name, data):
