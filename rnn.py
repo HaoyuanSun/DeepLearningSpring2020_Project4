@@ -164,7 +164,7 @@ def model_train(model_name, data, target, hidden_state):
 	model = Sequential()
 	if model_name == 'simple_rnn':
 		model.add(SimpleRNN(units=hidden_state, input_shape=(n, p)))
-		model.add(Dense(p, activation='sigmoid'))
+		model.add(Dense(p, activation='softmax'))
 	elif model_name == 'lstm':
 		model.add(LSTM(100, input_dim=58, return_sequences=True))
 		model.add(Dense(58))
@@ -175,12 +175,12 @@ def model_train(model_name, data, target, hidden_state):
 	# training the model
 	time_callback = TimeHistory()  # time callback used in model.fit()
 	batch_size = 200
-	epochs = 50
+	epochs = 100
 	model.compile(optimizer='adam',
-	              loss='mse',
+	              loss='categorical_crossentropy',
 	              metrics=['accuracy'])
 	hist = model.fit(data, target,
-	                 epochs=epochs,
+	                 batch_size=batch_size, epochs=epochs,
 	                 callbacks=[time_callback])
 
 	plot_loss_figure(hist, time_callback)
