@@ -144,10 +144,10 @@ def data_processing_2(text_file_name):
 		for j in range(n):
 			train_input[i][j][code.index(lines[i][j])] = 1
 
-	return train_input, train_output
+	return train_input, train_output, code
 
 
-def model_train(model_name, data, target, hidden_state):
+def model_train(model_name, data, target, hidden_state, code):
 	"""
 	Function to proceed the model training.
 	:param model_name: chosen model
@@ -166,7 +166,7 @@ def model_train(model_name, data, target, hidden_state):
 		model.add(SimpleRNN(units=hidden_state, input_shape=(n, p)))
 		model.add(Dense(p, activation='softmax'))
 	elif model_name == 'lstm':
-		model.add(LSTM(units=hidden_state, ))  # return_sequences=True
+		model.add(LSTM(units=hidden_state))  # , stateful=True, batch_input_shape=(200,)
 		model.add(Dense(p, activation='softmax'))
 	else:
 		print("Error model chosen.")
@@ -182,36 +182,57 @@ def model_train(model_name, data, target, hidden_state):
 	hist = model.fit(data, target,
 	                 batch_size=batch_size, epochs=epochs,
 	                 callbacks=[time_callback])
-	# model.fit(data, target,
-	#                  epochs=epochs)
-
 	plot_loss_figure(hist, time_callback)
 
+	model_test(model, code, n, p)
 
-# output = model.predict(data[0])
-# print(output)
+
+def model_test(model, code, n, p):
+	# prepare test data
+	text = 'we were both young when i first saw you'
+	x_test = np.zeros((1, n, p))
+	for i in range(n):
+		x_test[0][i][code.index(text[i])] = 1
+
+	# test the model
+	predict_lyrics = text[:n]
+	for j in range(50):
+		# make prediction
+		predict_code = model.predict(x_test)
+		max_index = np.argmax(predict_code)
+		next_letter = code[max_index]
+		predict_lyrics += next_letter
+
+		# update x_test
+		next_letter_code = np.zeros((1, p))
+		next_letter_code[0][max_index] = 1
+		x_test = np.delete(x_test[0], 0, axis=0)
+		# x_test = np.append(x_test[0], next_letter_code, axis=0)
+		x_test = np.insert(x_test, n - 1, next_letter_code, 0)
+		x_test = np.reshape(x_test, (1, n, p))
+	print(predict_lyrics)
 
 
 if __name__ == "__main__":
-	cmd_command = 0  # set parameters manually
+	cmd_command = 1  # set parameters manually
 	if cmd_command == 1:
 		# use cmd to run the code
 		file_name = sys.argv[1]
 		model_select = sys.argv[2]
-		hidden_state_size = sys.argv[3]
-		window_size = sys.argv[4]
-		stride = sys.argv[5]
+		hidden_state_size = int(sys.argv[3])
+		window_size = int(sys.argv[4])
+		stride = int(sys.argv[5])
 	else:
 		# manually set the parameters in the program
 		file_name = "beatles.txt"
-		model_select = "lstm"
-		hidden_state_size = 100
-		window_size = 5
+		model_select = "simple_rnn"
+		hidden_state_size = 50
+		window_size = 10
 		stride = 3
 
 	# data pre-processing
 	train_set, data_file = data_processing(file_name, window_size, stride)
-	x_train, y_train = data_processing_2(data_file)
+	x_train, y_train, code = data_processing_2(data_file)
 
 	# train model
-	model_train(model_select, x_train, y_train, hidden_state_size)
+	model_train(model_select, x_train, y_train, hidden_state_size, code)
