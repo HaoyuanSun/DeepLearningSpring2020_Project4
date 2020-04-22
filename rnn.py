@@ -166,7 +166,7 @@ def model_train(model_name, data, target, hidden_state, code):
 		model.add(SimpleRNN(units=hidden_state, input_shape=(n, p)))
 		model.add(Dense(p, activation='softmax'))
 	elif model_name == 'lstm':
-		model.add(LSTM(units=hidden_state))  # , stateful=True, batch_input_shape=(200,)
+		model.add(LSTM(units=hidden_state))
 		model.add(Dense(p, activation='softmax'))
 	else:
 		print("Error model chosen.")
